@@ -2,34 +2,63 @@ import React, { useState } from "react";
 import TodoForm from "./TodoForm";
 import TodoItem from "./TodoItem";
 
-export default function TodoList(props) {
-  const [todos, setTodos] = useState([]);
-
-  const addTodo = (todo) => {
-    if (!todo.text || /^\s*$/.test(todo.text)) {
+export default function TodoList({ arrayList, setTodos }) {
+  const addTodo = async (todo) => {
+    if (!todo.description || /^\s*$/.test(todo.description)) {
       return todo;
     }
 
-    const newTodos = [todo, ...todos];
+    const added = await fetch("http://localhost:5000/api/todo", {
+      method: "POST",
+      mode: "cors",
+      headers: {
+        "Content-type": "application/json",
+      },
+
+      body: JSON.stringify(todo),
+    });
+
+    const data = await added.json();
+
+    const newTodos = [...arrayList, data[0]];
     setTodos(newTodos);
   };
 
-  const updateTodo = (todoId, newValue) => {
-    if (!newValue.text || /^\s*$/.test(newValue.text)) {
+  const updateTodo = async (todoId, newValue) => {
+    if (!newValue.description || /^\s*$/.test(newValue.description)) {
       return;
     }
+
+    const update = await fetch(`http://localhost:5000/api/todo/${todoId}`, {
+      method: "PUT",
+      mode: "cors",
+      headers: {
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify(newValue),
+    });
+    const data = await update.json();
+
     setTodos((prev) =>
-      prev.map((item) => (item.id === todoId ? newValue : item))
+      prev.map((item) => (item.id === todoId ? data[0] : item))
     );
   };
 
-  const removeTodo = (id) => {
-    const removeArr = [...todos].filter((todo) => todo.id !== id);
+  const removeTodo = async (id) => {
+    await fetch(`http://localhost:5000/api/todo/${id}`, {
+      method: "DELETE",
+      mode: "cors",
+      headers: {
+        "Content-type": "application/json",
+      },
+    });
+
+    const removeArr = [...arrayList].filter((todo) => todo.id !== id);
     setTodos(removeArr);
   };
 
   const completeTodo = (id) => {
-    let updatedTodos = todos.map((todo) => {
+    let updatedTodos = arrayList.map((todo) => {
       if (todo.id === id) {
         todo.isComplete = !todo.isComplete;
       }
@@ -43,7 +72,7 @@ export default function TodoList(props) {
       <TodoForm onSubmit={addTodo} />
 
       <TodoItem
-        todos={todos}
+        todos={arrayList}
         completeTodo={completeTodo}
         removeTodo={removeTodo}
         updateTodo={updateTodo}

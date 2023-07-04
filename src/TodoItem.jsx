@@ -9,6 +9,10 @@ import Edit from "./images/tool.png";
 function TodoItem({ todos, completeTodo, removeTodo, updateTodo }) {
   const [edit, setEdit] = useState({ id: null, value: "" });
 
+  if (!todos) {
+    return <div>error</div>;
+  }
+
   const submitUpdate = (value) => {
     updateTodo(edit.id, value);
     setEdit({
@@ -23,7 +27,7 @@ function TodoItem({ todos, completeTodo, removeTodo, updateTodo }) {
   return todos.map((todo, index) => (
     <Border>
       <span key={todo.id} className={todo.isComplete ? "checked" : "unchecked"}>
-        {todo.text} {todo.deadline}
+        {todo.description} {todo.deadline_time}
       </span>
       <span className="actions">
         <input
@@ -49,16 +53,3 @@ function TodoItem({ todos, completeTodo, removeTodo, updateTodo }) {
 }
 
 export default TodoItem;
-
-/*.itemButtons{
-	background-color: #6E85B7;
-	border-radius: 25px;
-	border:none;
-	width:70px;
-	height: 40px;
-	margin:2px;
-}
-
-.itemButtons:hover{
-	background-color:#A4BAEF;
-}*/
